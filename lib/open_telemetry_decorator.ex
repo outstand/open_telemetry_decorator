@@ -9,7 +9,7 @@ defmodule OpenTelemetryDecorator do
              # compensate for anchor id differences between ExDoc and GitHub
              |> (&Regex.replace(~R{\(\#\K(?=[a-z][a-z0-9-]+\))}, &1, "module-")).()
 
-  use Decorator.Define, trace: 1, trace: 2
+  use Decorator.Define, trace: 0, trace: 1, trace: 2
 
   @doc """
   Decorate a function to add an OpenTelemetry trace with a named span.
@@ -33,7 +33,15 @@ defmodule OpenTelemetryDecorator do
   end
   ```
   """
-  def trace(span_name, opts \\ [], body, context) do
+  def trace(span_name \\ nil, opts \\ [], body, context)
+
+  def trace(span_name, opts, body, context)
+  when is_nil(span_name) do
+    span_name = SpanName.from_context(context)
+    trace(span_name, opts, body, context)
+  end
+
+  def trace(span_name, opts, body, context) do
     include = Keyword.get(opts, :include, [])
     Validator.validate_args(span_name, include)
 
