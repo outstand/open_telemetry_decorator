@@ -33,7 +33,7 @@ defmodule OpenTelemetryDecorator do
   end
   ```
   """
-  def trace(opts, body, context) do
+  def trace(opts \\ [], body, context) do
     include = Keyword.get(opts, :include, [])
     Validator.validate_args(include)
 
