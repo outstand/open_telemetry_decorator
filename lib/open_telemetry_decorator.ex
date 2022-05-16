@@ -9,7 +9,7 @@ defmodule OpenTelemetryDecorator do
              # compensate for anchor id differences between ExDoc and GitHub
              |> (&Regex.replace(~R{\(\#\K(?=[a-z][a-z0-9-]+\))}, &1, "module-")).()
 
-  use Decorator.Define, trace: 0, trace: 1, trace: 2
+  use Decorator.Define, trace: 0, trace: 1
 
   @doc """
   Decorate a function to add an OpenTelemetry trace with a named span.
@@ -33,17 +33,11 @@ defmodule OpenTelemetryDecorator do
   end
   ```
   """
-  def trace(span_name \\ nil, opts \\ [], body, context)
-
-  def trace(span_name, opts, body, context)
-  when is_nil(span_name) do
-    span_name = SpanName.from_context(context)
-    trace(span_name, opts, body, context)
-  end
-
-  def trace(span_name, opts, body, context) do
+  def trace(opts, body, context) do
     include = Keyword.get(opts, :include, [])
-    Validator.validate_args(span_name, include)
+    Validator.validate_args(include)
+
+    span_name = "#{module_name(context.module)}.#{context.name}/#{context.arity}"
 
     quote location: :keep do
       require OpenTelemetry.Span
@@ -65,4 +59,14 @@ defmodule OpenTelemetryDecorator do
       target = "#{inspect(context.module)}.#{context.name}/#{context.arity} @decorate telemetry"
       reraise %ArgumentError{message: "#{target} #{e.message}"}, __STACKTRACE__
   end
+
+  @doc """
+  Converts module name atoms to strings.
+  """
+  @spec module_name(atom() | String.t()) :: String.t()
+  defp module_name("Elixir." <> module), do: module
+
+  defp module_name(module) when is_binary(module), do: module
+
+  defp module_name(module), do: module |> to_string() |> module_name()
 end
