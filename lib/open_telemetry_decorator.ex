@@ -60,9 +60,6 @@ defmodule OpenTelemetryDecorator do
       reraise %ArgumentError{message: "#{target} #{e.message}"}, __STACKTRACE__
   end
 
-  @doc """
-  Converts module name atoms to strings.
-  """
   @spec module_name(atom() | String.t()) :: String.t()
   defp module_name("Elixir." <> module), do: module
 
