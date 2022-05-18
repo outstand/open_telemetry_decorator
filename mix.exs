@@ -24,7 +24,7 @@ defmodule OpenTelemetryDecorator.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :tls_certificate_check]
     ]
   end
 
@@ -34,11 +34,11 @@ defmodule OpenTelemetryDecorator.MixProject do
       {:credo, "~> 1.5.1", only: [:dev, :test], runtime: false},
       {:decorator, "~> 1.4.0"},
       {:dialyxir, "~> 1.1.0", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.25.3", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.28.4", only: :dev, runtime: false},
       {:excoveralls, "~> 0.14.0", only: :test, runtime: false},
-      {:opentelemetry, "~> 1.0.0-rc.3", only: :test},
-      {:opentelemetry_api, "~> 1.0.0-rc.3"},
-      {:opentelemetry_exporter, "~> 1.0.0-rc.3", only: :test}
+      {:opentelemetry, "~> 1.0"},
+      {:opentelemetry_api, "~> 1.0"},
+      {:opentelemetry_exporter, "~> 1.0"}
     ]
   end
 

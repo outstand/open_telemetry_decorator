@@ -1,0 +1,38 @@
+services:
+  elixir:
+    build:
+      context: .
+    image: outstand/open_telemetry_decorator:dev
+    working_dir: ${WORKSPACE_DIR}
+    environment:
+      FIXUID:
+      FIXGID:
+      WORKSPACE_DIR:
+    volumes:
+      - config:/home/deploy/.config
+      - hex:/home/deploy/.hex
+      - mix:/home/deploy/.mix
+      - cache:/home/deploy/.cache
+      - .:${WORKSPACE_DIR}
+
+  tools:
+    image: outstand/open_telemetry_decorator:dev
+    entrypoint: /tools-entrypoint.sh
+    command: exit
+    stdin_open: true
+    working_dir: ${WORKSPACE_DIR}
+    environment:
+      FIXUID:
+      FIXGID:
+      WORKSPACE_DIR:
+    volumes:
+      - config:/home/deploy/.config
+      - hex:/home/deploy/.hex
+      - mix:/home/deploy/.mix
+      - .:${WORKSPACE_DIR}
+
+volumes:
+  config:
+  hex:
+  mix:
+  cache:

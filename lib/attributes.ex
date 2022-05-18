@@ -7,46 +7,21 @@ defmodule Attributes do
     |> maybe_add_result(reportable_attr_keys, result)
     |> remove_underscores()
     |> convert_atoms_to_strings()
-    |> Enum.into([])
+    |> Enum.into(%{})
   end
 
   defp take_attrs(bound_variables, attr_keys) do
-    {keys, nested_keys} = Enum.split_with(attr_keys, &is_atom/1)
-
-    attrs = Keyword.take(bound_variables, keys)
-    nested_attrs = take_nested_attrs(bound_variables, nested_keys)
-
-    Keyword.merge(nested_attrs, attrs)
-  end
-
-  defp take_nested_attrs(bound_variables, nested_keys) do
-    nested_keys
-    |> Enum.map(fn key_list ->
-      key = key_list |> Enum.join("_") |> String.to_atom()
-      {obj_key, other_keys} = List.pop_at(key_list, 0)
-
-      with {:ok, obj} <- Keyword.fetch(bound_variables, obj_key),
-           {:ok, value} <- take_nested_attr(obj, other_keys) do
-        {key, value}
-      else
-        _ -> nil
-      end
+    bound_variables
+    |> Keyword.take(attr_keys)
+    |> Enum.map(fn {key, value} ->
+      value = _inspect(value)
+      {key, value}
     end)
-    |> Enum.reject(&is_nil/1)
-  end
-
-  defp take_nested_attr(nil, _keys), do: {:error, nil}
-
-  defp take_nested_attr(obj, keys) do
-    case get_in(obj, Enum.map(keys, &Access.key(&1, nil))) do
-      nil -> {:error, :not_found}
-      value -> {:ok, value}
-    end
   end
 
   defp maybe_add_result(attrs, attr_keys, result) do
     if Enum.member?(attr_keys, :result) do
-      Keyword.put_new(attrs, :result, result)
+      Keyword.put_new(attrs, :result, _inspect(result))
     else
       attrs
     end
@@ -72,5 +47,16 @@ defmodule Attributes do
         {key, value}
       end
     end)
+  end
+
+  defp _inspect(term) do
+    cond do
+      Enumerable.impl_for(term) ->
+        inspect(term)
+      String.Chars.impl_for(term) ->
+        term
+      true ->
+        inspect(term)
+    end
   end
 end
